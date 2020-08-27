@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright 2020 XEBIALABS
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<synthetic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns="http://www.xebialabs.com/deployit/synthetic"
+           xsi:schemaLocation="http://www.xebialabs.com/deployit/synthetic synthetic.xsd">
+
+
+    <!-- <type type="mule.Mulesoft" extends="udm.BaseContainer" description="The controlling unit in a Kubernetes cluster which serves as the main management contact point for administrators." root="INFRASTRUCTURE">
+      <property name="username" label="Username" required="false" kind="string" category="Username/password Authentication" description="Username with which to authenticate, if using username/password authentication." />
+      <property name="password" label="Password" required="false" kind="string" password="true" category="Username/password Authentication" description="Password with which to authenticate, if using username/password authentication." />
+      <property name="url" label="URL" required="false" kind="string" description="Authentication token, if using token based authentication." />
+      <property name="cert" category="input" kind="string" required="false" size="large" label="Project Description"/>
+        </type> -->
+
+  <type type="mule.Mulesoft" extends="udm.BaseContainer" description="Cloudhub Service Credentials" root="INFRASTRUCTURE" inspectable="true">
+    <property name="username" kind="string" default="" inspectionProperty="true" description="Cloudhub Username" />
+    <property name="password" label="Password" kind="string" password="true" default="" inspectionProperty="true" description="Cloudhub Password" />
+    <property name="url" label="URL" kind="string" default="https://anypoint.mulesoft.com"/>
+    <property name="caCert" label="CA certificate" required="false" kind="string" size="large" description="Certification authority certificate(ca.crt) for server" />
+    <!--property name="password" label="Password" required="false" kind="string" password="true" category="Username/password Authentication" description="Password with which to authenticate, if using username/password authentication." /-->
+
+    <property name="MasterOrgId" default="" required="false" category="Metadata" description="Organization ID (auto-filled during discovery)" />
+    <property name="MasterOrgDomain" default="" required="false" category="Metadata" description="Organization domain (auto-filled during discovery)" />
+    <method name="findEnvironments" delegate="jythonScript" description="Download the list of available environments from Cloudhub."
+                script="mule/get_profile.py"/>
+
+  </type>
+
+  <type type="mule.Mulesoft.Domain" extends="udm.BaseContainer" description="Points to a Cloudhub environment, such as sandbox or production. It is possible create multiple TargetEnvironments pointing to the same Cloudhub environment.">
+    <property name="masterDomain" kind="ci" referenced-type="mule.Mulesoft" as-containment="true"/>
+    <property name="OrgId" kind="string" required="false" description="Environment name as listed in CloudHub. This helps you identify which CloudHub Environment is being targeted, but this is not required for deployment."/>
+    <property name="OrgDomain" kind="string" label="EnvironmentID" required="true" description="Environment unique ID. This looks like '1e74a63d-f32b-4b52-a8cf-eeea24f99bb1' and can be filled during discovery."/>
+    <!-- <property name="defaultAppSpec" kind="string" size="large" required="true" description=""/> -->
+    <method name="findEnvironments" delegate="jythonScript" description="Download the list of available environments from Cloudhub."
+                script="mule/get_env.py"/>
+
+  </type>
+
+  <type type="mule.Mulesoft.Domain.TargetEnvironment" extends="udm.BaseContainer" description="Points to a Cloudhub environment, such as sandbox or production. It is possible create multiple TargetEnvironments pointing to the same Cloudhub environment.">
+    <property name="orgLevelDomain" kind="ci" referenced-type="mule.Mulesoft.Domain" as-containment="true"/>
+    <property name="envName" kind="string" required="false" description="Environment name as listed in CloudHub. This helps you identify which CloudHub Environment is being targeted, but this is not required for deployment."/>
+    <property name="envId" kind="string" label="EnvironmentID" required="true" description="Environment unique ID. This looks like '1e74a63d-f32b-4b52-a8cf-eeea24f99bb1' and can be filled during discovery."/>
+    <!-- <property name="defaultAppSpec" kind="string" size="large" required="true" description=""/> -->
+  </type>
+
+
+<!--
+    <type type="mule.Mulesoft" extends="generic.Container" description="Cassandra CQL*Plus client">
+      <property name="username" required="false" description="If set, the user name to use if none is set on the deployed cql.ExecutedcqlScripts" />
+      <property name="password" required="false" password="true" description="If set, the password to use if none is set on the deployed cql.ExecutedcqlScripts" />
+      <property name="additionalOptions" required="false" size="medium" description="Specify additional options to be passed to the command-line cql client" />
+      <property name="sid" description="The Cassandra SID to connect to" />
+    </type> -->
+
+    <!-- <type type="mule.AppTarget" extends="udm.BaseContainer" virtual="true">
+        <property name="sid" description="The Cassandra SID to connect to" />
+    </type>
+
+    <type type="mule.Cluster" extends="mule.AppTarget"/>
+    <type type="mule.ServerGroup" extends="mule.AppTarget"/>
+ -->
+
+    <type type="mule.ApplicationModule" extends="udm.BaseDeployedArtifact" deployable-type="mule.Application" container-type="mule.Mulesoft.Domain.TargetEnvironment">
+        <generate-deployable type="mule.Application" extends="udm.BaseDeployableArtifact"/>
+        <property name="domain"/>
+        <property name="monitoringAutoRestart" kind="boolean" default="true"/>
+        <property name="wait_time" kind="integer" hidden="true" default="10"/>
+        <property name="attempts" kind="integer" hidden="true" default="4"/>
+        <property name="numWorkers" kind="integer" label="Number of Workers" default="1"/>
+        <property name="workers" kind="enum" label="worker cores">
+          <enum-values>
+            <value>{"name":"Micro","weight":"0.1","cpu":"0.1 vCores", "memory":"500 MB memory"}</value>
+            <value>{"name":"Small","weight":"0.2","cpu":"0.2 vCores", "memory":"1" GB memory"}</value>
+            <value>{"name":"Medium","weight":"1","cpu":"1 vCores", "memory":"1.5" GB memory"}</value>
+            <value>{"name":"large","weight":"2","cpu":"2 vCores", "memory":"3.5" GB memory"}</value>
+            <value>{"name":"xlarge","weight":"4","cpu":"4 vCores", "memory":"7.5" GB memory"}</value>
+            <value>{"name":"xxlarge","weight":"8","cpu":"8 vCores", "memory":"15" GB memory"}</value>
+            <value>{"name":"4xlarge","weight":"16","cpu":"16 vCores", "memory":"32" GB memory"}</value>
+          </enum-values>
+        </property>
+        <property name="MulesoftVersion" label="Mulesoft Versions">
+        </property>
+    </type>
+
+</synthetic>

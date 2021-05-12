@@ -56,23 +56,24 @@ class mulesoftClient(object):
             response = response.json()
             return response['access_token']
 
-    def deploy_package(self, file_path, domain, workers, Enabled, muleVersion, numWorkers):
+    def deploy_package(self, file_path, domain, workers, Enabled, muleVersion, numWorkers, region, appProperties):
         #{"name":"Micro","weight":"0.1","cpu":"0.1 vCores", "memory":"500 MB memory"}
         workers = json.loads(workers)
         url = self._url + "/cloudhub/api/v2/applications"
         #url = "https://anypoint.mulesoft.com/cloudhub/api/v2/applications" #infra
+        prop = {}
+        for (k,v) in appProperties.items() : 
+            prop[k] = v
         payload = {'appInfoJson': {
         "domain": domain,
         "muleVersion" : {"version":muleVersion}, #infra
-        "region" : "us-east-2", #infra"  ca-c1.cloudhub.io"#
+        "region" : region, #infra"  ca-c1.cloudhub.io"#
         "monitoringEnabled": True,
         "monitoringAutoRestart" : Enabled,
         "workers": {"amount": numWorkers, "type": workers},
         "loggingNgEnabled": True,
         "persistentQueues": False,
-         "properties":{
-              "key1":"value1"
-           }
+         "properties": prop
         },
         'autoStart': True}
         payload['appInfoJson']= json.dumps(payload['appInfoJson'])

@@ -15,6 +15,8 @@ workers = str(deployed.workers)
 Enabled = deployed.monitoringAutoRestart
 muleVersion = deployed.MulesoftVersion
 numWorkers = deployed.numWorkers
-client.deploy_package(deployed.file.path, domain, workers, Enabled, muleVersion, numWorkers)
+region = deployed.region
+appProperties = deployed.appProperties
+client.deploy_package(deployed.file.path, domain, workers, Enabled, muleVersion, numWorkers, region)
 
 print "Finished deploying application."

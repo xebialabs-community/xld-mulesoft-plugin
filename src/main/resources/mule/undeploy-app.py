@@ -11,7 +11,7 @@ reload(mule.mulesoftClient)
 from mule.mulesoftClient import mulesoftClient
 
 client = mulesoftClient.create_client_from_deployed(previousDeployed)
-print "undeploying application"
+print "Undeploying application."
 domain = str(previousDeployed.domain)
 client.undeploy_package(domain)
 stopMe = True

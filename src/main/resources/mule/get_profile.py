@@ -39,16 +39,17 @@ def get_env(url, id, name):
 
 cert = thisCi.caCert
 
-        # path = str(path)
-path = '/opt/xebialabs/xl-deploy-server/'
-file = path + "ca.pem"
-file = str(file)
-text_file = open(file, "w")
-text_file.write(cert)
-text_file.close()
-        # global os.environ['REQUESTS_CA_BUNDLE']
-# os.environ['REQUESTS_CA_BUNDLE'] = "ca.pem"
-os.environ['REQUESTS_CA_BUNDLE'] = file
+# path = str(path)
+# path = '/opt/xebialabs/xl-deploy-server/'
+# file = path + "ca.pem"
+# file = "ca.pem"
+# file = str(file)
+# text_file = open(file, "w")
+# text_file.write(cert)
+# text_file.close()
+# global os.environ['REQUESTS_CA_BUNDLE']
+os.environ['REQUESTS_CA_BUNDLE'] = "ca.pem"
+# os.environ['REQUESTS_CA_BUNDLE'] = file
 
 login_uri = thisCi.url + '/accounts/login';
 profile_uri = thisCi.url + '/accounts/api/profile';

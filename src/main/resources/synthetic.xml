@@ -75,15 +75,33 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         <property name="wait_time" kind="integer" hidden="true" default="10"/>
         <property name="attempts" kind="integer" hidden="true" default="4"/>
         <property name="numWorkers" kind="integer" label="Number of Workers" default="1"/>
-        <property name="workers" kind="enum" label="worker cores">
+        <property name="workers" kind="enum" label="Worker cores">
           <enum-values>
             <value>{"name":"Micro","weight":"0.1","cpu":"0.1 vCores", "memory":"500 MB memory"}</value>
-            <value>{"name":"Small","weight":"0.2","cpu":"0.2 vCores", "memory":"1" GB memory"}</value>
-            <value>{"name":"Medium","weight":"1","cpu":"1 vCores", "memory":"1.5" GB memory"}</value>
-            <value>{"name":"large","weight":"2","cpu":"2 vCores", "memory":"3.5" GB memory"}</value>
-            <value>{"name":"xlarge","weight":"4","cpu":"4 vCores", "memory":"7.5" GB memory"}</value>
-            <value>{"name":"xxlarge","weight":"8","cpu":"8 vCores", "memory":"15" GB memory"}</value>
-            <value>{"name":"4xlarge","weight":"16","cpu":"16 vCores", "memory":"32" GB memory"}</value>
+            <value>{"name":"Small","weight":"0.2","cpu":"0.2 vCores", "memory":"1 GB memory"}</value>
+            <value>{"name":"Medium","weight":"1","cpu":"1 vCores", "memory":"1.5 GB memory"}</value>
+            <value>{"name":"large","weight":"2","cpu":"2 vCores", "memory":"3.5 GB memory"}</value>
+            <value>{"name":"xlarge","weight":"4","cpu":"4 vCores", "memory":"7.5 GB memory"}</value>
+            <value>{"name":"xxlarge","weight":"8","cpu":"8 vCores", "memory":"15 GB memory"}</value>
+            <value>{"name":"4xlarge","weight":"16","cpu":"16 vCores", "memory":"32 GB memory"}</value>
+          </enum-values>
+        </property>
+        <property name="appProperties" kind="map_string_string" required="false" description="App Properties"/>
+        <property name="region" kind="enum" label="Region" default="us-east-2">
+          <enum-values>
+            <value>us-east-1</value>
+            <value>us-east-2</value>
+            <value>us-west-1</value>
+            <value>us-west-2</value>
+            <value>us-gov-west-1</value>
+            <value>eu-central-1</value>
+            <value>eu-west-1</value>
+            <value>eu-west-2</value>
+            <value>ap-southeast-1</value>
+            <value>ap-southeast-2</value>
+            <value>ap-northeast-1</value>
+            <value>ca-central-1</value>
+            <value>sa-east-1</value>
           </enum-values>
         </property>
         <property name="MulesoftVersion" label="Mulesoft Versions">

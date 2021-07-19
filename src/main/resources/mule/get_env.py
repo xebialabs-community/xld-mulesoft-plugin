@@ -33,13 +33,13 @@ def get_env(id):
             newTeCi.envId = envItem['id'];
             repositoryService.create(newCiId, newTeCi);
 
-if "/opt/xebialabs/xl-deploy-server/ca.pem" != str(os.environ['REQUESTS_CA_BUNDLE']):
-    file = "/opt/xebialabs/xl-deploy-server/ca.pem"
+if "ca.pem" != str(os.environ['REQUESTS_CA_BUNDLE']):
+    file = "ca.pem"
     cert = thisCi.masterDomain.caCert
     file = str(file)
-    text_file = open(file, "w")
-    text_file.write(cert)
-    text_file.close()
+    # text_file = open(file, "w")
+    # text_file.write(cert)
+    # text_file.close()
     os.environ['REQUESTS_CA_BUNDLE'] = file;
 
 login_uri = 'https://anypoint.mulesoft.com/accounts/login';

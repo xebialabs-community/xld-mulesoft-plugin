@@ -12,7 +12,7 @@ from shutil import copyfile
 import requests
 
 import os
-#os.environ['REQUESTS_CA_BUNDLE'] #= 'ca.pem';
+os.environ['REQUESTS_CA_BUNDLE'] = 'ca.pem';
 
 import org.slf4j.LoggerFactory as LoggerFactory
 
@@ -20,19 +20,12 @@ logger = LoggerFactory.getLogger("Mulesoft")
 
 class mulesoftClient(object):
     def __init__(self, url, username, password, orgId, envId, cert):
-        if "/opt/xebialabs/xl-deploy-server/ca.pem" != str(os.environ['REQUESTS_CA_BUNDLE']):
-            file = "/opt/xebialabs/xl-deploy-server/ca.pem"
-            file = str(file)
-            text_file = open(file, "w")
-            text_file.write(cert)
-            text_file.close()
-            os.environ['REQUESTS_CA_BUNDLE'] = file;
         self._url = url
         if url.endswith('/'):
             self._url = url[:-1]
         self.username = username
         self.password = password
-        self.token = self.get_token()#'20db92f1-36f7-4ae6-b4ce-5ecbca7f1798'
+        self.token = self.get_token()   # '20db92f1-36f7-4ae6-b4ce-5ecbca7f1798'
         self.OrgId = orgId
         self.EnvId = envId
 
@@ -51,31 +44,38 @@ class mulesoftClient(object):
         headers = {'content-type': 'application/json'}
         response = requests.request("POST", url , data = content, headers = headers)
         if response.raise_for_status():
-            raise Exception("Failed to deploy. Server return %s.\n%s" % (response.status_code, response.reason))
+            raise Exception("Failed to get token. Server returned %s.\n%s" % (response.status_code, response.reason))
         else:
             response = response.json()
             return response['access_token']
 
-    def deploy_package(self, file_path, domain, workers, Enabled, muleVersion, numWorkers):
-        #{"name":"Micro","weight":"0.1","cpu":"0.1 vCores", "memory":"500 MB memory"}
+    def deploy_package(self, file_path, domain, workers, Enabled, muleVersion, numWorkers, region, appProperties):
+        
         workers = json.loads(workers)
-        url = self._url + "/cloudhub/api/v2/applications"
-        #url = "https://anypoint.mulesoft.com/cloudhub/api/v2/applications" #infra
-        payload = {'appInfoJson': {
-        "domain": domain,
-        "muleVersion" : {"version":muleVersion}, #infra
-        "region" : "us-east-2", #infra"  ca-c1.cloudhub.io"#
-        "monitoringEnabled": True,
-        "monitoringAutoRestart" : Enabled,
-        "workers": {"amount": numWorkers, "type": workers},
-        "loggingNgEnabled": True,
-        "persistentQueues": False,
-         "properties":{
-              "key1":"value1"
-           }
-        },
-        'autoStart': True}
+        url = "https://anypoint.mulesoft.com/cloudhub/api/v2/applications"
+        
+        prop = {}
+        for (k,v) in appProperties.items() : 
+            prop[k] = v
+        
+        payload = {
+            'appInfoJson': {
+                "domain": domain,
+                "muleVersion" : {"version":muleVersion}, #infra
+                "region" : region, #infra"  ca-c1.cloudhub.io"#
+                "monitoringEnabled": True,
+                "monitoringAutoRestart" : Enabled,
+                "workers": {"amount": numWorkers, "type": workers},
+                "loggingNgEnabled": True,
+                "persistentQueues": False,
+                "properties": prop
+                },
+            'autoStart': "true",
+            }
+            
+        # Convert inner appInfojson to string
         payload['appInfoJson']= json.dumps(payload['appInfoJson'])
+        
         files = [
           ('file', open(file_path,'rb'))
         ]
@@ -84,11 +84,21 @@ class mulesoftClient(object):
           'x-anypnt-org-id': str(self.OrgId),
           'Authorization': 'Bearer %s' % self.token
         }
+        
+
         response = requests.request("POST", url, headers=headers, data = payload, files = files)
-        if response.raise_for_status():
-                 raise Exception("Failed to deploy. Server return %s.\n%s" % (response.status_code, response.reason))
+        # response = requests.request("POST", url, headers=headers, files=payload)
+        if response.status_code != 200: #  or response.raise_for_status()
+            print response.status_code
+            print response.text
+            raise Exception("Failed to deploy. Server returned %s.\n%s" % (response.status_code, response.reason))
         else:
-            response = response.json()
+            try : 
+                responseJson = response.json()
+            except : 
+                print "(Could not decode JSON)"
+        print response.status_code
+        print response.text;
 
     def undeploy_package(self, domain):
         url = self._url + "/cloudhub/api/v2/applications"
@@ -105,7 +115,7 @@ class mulesoftClient(object):
         data = json.dumps(data)
         response = requests.request("PUT", url, headers=headers, data = data)
         if response.raise_for_status():
-                 raise Exception("Failed to deploy. Server return %s.\n%s" % (response.status_code, response.reason))
+                 raise Exception("Failed to undeploy. Server returned %s.\n%s" % (response.status_code, response.reason))
         else:
             print "Application successfully deleted"
 
@@ -123,7 +133,7 @@ class mulesoftClient(object):
         ]
         response = requests.request("POST", url, headers=headers, data = data, files = files)
         if response.raise_for_status():
-                 raise Exception("Failed to deploy. Server return %s.\n%s" % (response.status_code, response.reason))
+                 raise Exception("Failed to modify package. Server returned %s.\n%s" % (response.status_code, response.reason))
         else:
             print "Application successfully updated"
 
@@ -136,7 +146,7 @@ class mulesoftClient(object):
         }
         response = requests.request("GET", url, headers=headers)
         if response.raise_for_status():
-                 raise Exception("Failed to deploy. Server return %s.\n%s" % (response.status_code, response.reason))
+                 raise Exception("Failed to check app status. Server returned %s.\n%s" % (response.status_code, response.reason))
         else:
             # print "Application successfully deleted"
             response = response.json()

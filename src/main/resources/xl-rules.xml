@@ -23,19 +23,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         </steps>
     </rule>
 
-    <!-- <rule name="Mule.MODIFY" scope="deployed">
+    <rule name="Mule.MODIFY" scope="deployed">
         <conditions>
             <type>mule.ApplicationModule</type>
             <operation>MODIFY</operation>
         </conditions>
         <steps>
             <jython>
-                <description>"MODIFY"</description>
+                <description expression="true">"modify application %s on %s" % (deployed.domain, deployed.container.name)</description>
                 <script>mule/modify-app.py</script>
                 <order>50</order>
             </jython>
         </steps>
-    </rule> -->
+    </rule>
 
     <rule name="Mule.UninstallApplicationToServerGroup" scope="deployed">
         <conditions>

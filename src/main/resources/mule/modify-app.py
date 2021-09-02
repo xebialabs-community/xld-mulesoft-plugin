@@ -10,7 +10,14 @@ from mule.mulesoftClient import mulesoftClient
 print "Modifying application."
 client = mulesoftClient.create_client_from_deployed(deployed)
 domain = str(deployed.domain)
-client.modify_package(deployed.file.path, domain)
+workers = str(deployed.workers)
+Enabled = deployed.monitoringAutoRestart
+muleVersion = deployed.MulesoftVersion
+numWorkers = deployed.numWorkers
+region = deployed.region
+appProperties = deployed.appProperties
+# print previousDeployed.file
+client.modify_package(deployed.file.path, domain, workers, Enabled, muleVersion, numWorkers, region, appProperties)
 # print "deploy"
 # client.deploy_package(deployed.file.path)
 

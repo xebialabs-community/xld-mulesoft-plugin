@@ -50,14 +50,14 @@ class mulesoftClient(object):
             return response['access_token']
 
     def deploy_package(self, file_path, domain, workers, Enabled, muleVersion, numWorkers, region, appProperties):
-        
+
         workers = json.loads(workers)
         url = "https://anypoint.mulesoft.com/cloudhub/api/v2/applications"
-        
+
         prop = {}
-        for (k,v) in appProperties.items() : 
+        for (k,v) in appProperties.items() :
             prop[k] = v
-        
+
         payload = {
             'appInfoJson': {
                 "domain": domain,
@@ -72,10 +72,10 @@ class mulesoftClient(object):
                 },
             'autoStart': "true",
             }
-            
+
         # Convert inner appInfojson to string
         payload['appInfoJson']= json.dumps(payload['appInfoJson'])
-        
+
         files = [
           ('file', open(file_path,'rb'))
         ]
@@ -84,7 +84,7 @@ class mulesoftClient(object):
           'x-anypnt-org-id': str(self.OrgId),
           'Authorization': 'Bearer %s' % self.token
         }
-        
+
 
         response = requests.request("POST", url, headers=headers, data = payload, files = files)
         # response = requests.request("POST", url, headers=headers, files=payload)
@@ -93,9 +93,9 @@ class mulesoftClient(object):
             print response.text
             raise Exception("Failed to deploy. Server returned %s.\n%s" % (response.status_code, response.reason))
         else:
-            try : 
+            try :
                 responseJson = response.json()
-            except : 
+            except :
                 print "(Could not decode JSON)"
         print response.status_code
         print response.text;
@@ -119,19 +119,43 @@ class mulesoftClient(object):
         else:
             print "Application successfully deleted"
 
-    def modify_package(self, file_path, domain):
-        url = self._url + "/cloudhub/api/v2/applications/%s/files" % domain
+    def modify_package(self, file_path, domain, workers, Enabled, muleVersion, numWorkers, region, appProperties):
+        #url = self._url + "/cloudhub/api/v2/applications/%s/files" % domain
+        url = self._url + ("/cloudhub/api/v2/applications/%s" % domain)
         # url = "https://anypoint.mulesoft.com/cloudhub/api/v2/applications/%s/files" % domain
         headers = {
           'x-anypnt-env-id': str(self.EnvId),
-          'x-anypnt-org-id': str(self.OrgId),
           'Authorization': 'Bearer %s' % self.token
         }
-        data = {}
+
+        workers = json.loads(workers)
+        prop = {}
+        for (k,v) in appProperties.items() :
+            prop[k] = v
+
+        payload = {
+            'appInfoJson': {
+                "domain": domain,
+                "muleVersion" : {"version":muleVersion}, #infra
+                "region" : region, #infra"  ca-c1.cloudhub.io"#
+                "monitoringEnabled": True,
+                "monitoringAutoRestart" : Enabled,
+                "workers": {"amount": numWorkers, "type": workers},
+                "loggingNgEnabled": True,
+                "persistentQueues": False,
+                "properties": prop
+                },
+            'autoStart': "true",
+            }
+
+        # Convert inner appInfojson to string
+        payload['appInfoJson']= json.dumps(payload['appInfoJson'])
+
+
         files = [
-        ('file', open(file_path,'rb'))
+          ('file', open(file_path,'rb'))
         ]
-        response = requests.request("POST", url, headers=headers, data = data, files = files)
+        response = requests.request("PUT", url, headers=headers, data = payload, files = files)
         if response.raise_for_status():
                  raise Exception("Failed to modify package. Server returned %s.\n%s" % (response.status_code, response.reason))
         else:

@@ -108,8 +108,12 @@ class mulesoftClient(object):
           'Authorization': 'Bearer %s' % self.token,
           'Content-Type': 'application/json'
         }
+        # data = {
+        # "action": "DELETE",
+        # "domains": [domain]
+        # }
         data = {
-        "action": "DELETE",
+        "action": "STOP",
         "domains": [domain]
         }
         data = json.dumps(data)

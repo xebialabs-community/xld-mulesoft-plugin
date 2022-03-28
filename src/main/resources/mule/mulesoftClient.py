@@ -1,4 +1,4 @@
-# Copyright 2021 XEBIALABS
+# Copyright 2022 XEBIALABS
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 # The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory as LoggerFactory
 logger = LoggerFactory.getLogger("Mulesoft")
 
 class mulesoftClient(object):
-    def __init__(self, url, username, password, orgId, envId, cert):
+    def __init__(self, url, username, password, orgId, envId, cert, serviceType):
         self._url = url
         if url.endswith('/'):
             self._url = url[:-1]
@@ -28,11 +28,12 @@ class mulesoftClient(object):
         self.token = self.get_token()   # '20db92f1-36f7-4ae6-b4ce-5ecbca7f1798'
         self.OrgId = orgId
         self.EnvId = envId
+        self.serviceType = serviceType
 
     @staticmethod
     def create_client_from_deployed(deployed):
         mmc = deployed.container
-        return mulesoftClient(mmc.orgLevelDomain.masterDomain.url, mmc.orgLevelDomain.masterDomain.username, mmc.orgLevelDomain.masterDomain.password, mmc.orgLevelDomain.OrgId, mmc.envId,  mmc.orgLevelDomain.masterDomain.caCert)
+        return mulesoftClient(mmc.orgLevelDomain.masterDomain.url, mmc.orgLevelDomain.masterDomain.username, mmc.orgLevelDomain.masterDomain.password, mmc.orgLevelDomain.OrgId, mmc.envId,  mmc.orgLevelDomain.masterDomain.caCert, mmc.orgLevelDomain.masterDomain.serviceType)
 
     def get_token(self):
         content = {

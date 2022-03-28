@@ -8,13 +8,12 @@ plugins {
 defaultTasks 'build'
 
 apply plugin: 'java'
-apply plugin: 'maven'
 
 xlDocker {
   compileImage = 'xebialabsunsupported/xld_dev_compile'
-  compileVersion = '9.6'
+  compileVersion = '10.2'
   runImage = 'xebialabsunsupported/xld_dev_run'
-  runVersion = '9.6'
+  runVersion = '10.2'
   runPortMapping = '4516:4516'
 }
 

@@ -1,0 +1,29 @@
+---
+apiVersion: xl-deploy/v1
+kind: Applications
+spec:
+- directory: Applications/Cloudhub-Mulesoft-App-Dir
+  children:
+  - name: Cloudhub-Mulesoft-App
+    type: udm.Application
+    lastVersion: V2.0
+    children:
+    - name: V2.0
+      type: udm.DeploymentPackage
+      deployables:
+      - name: Cloudhub-Mulesoft-App
+        type: mule.Application
+        scanPlaceholders: true
+        preScannedPlaceholders: false
+        fileEncodings:
+          ".+\\.properties": ISO-8859-1
+        isRescanned: false
+        domain: digitalai-2
+        numWorkers: "1"
+        workers: "{\"name\":\"Micro\",\"weight\":\"0.1\",\"cpu\":\"0.1 vCores\", \"\
+          memory\":\"500 MB memory\"}"
+        region: us-east-2
+        MulesoftVersion: 4.4.0
+        file: !file "artifacts/Applications/Cloudhub-Mulesoft-App-Dir/Cloudhub-Mulesoft-App/V2.0/Cloudhub-Mulesoft-App/hellomule.jar"
+      dependencyResolution: LATEST
+      undeployDependencies: "false"

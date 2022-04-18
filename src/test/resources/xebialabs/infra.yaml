@@ -1,0 +1,39 @@
+---
+apiVersion: xl-deploy/v1
+kind: Infrastructure
+spec:
+- name: Infrastructure/Cloudhub-Mulesoft
+  type: mule.Mulesoft
+  allowConcurrentDeployments: true
+  username: ldamato
+  password: !value "Infrastructure_Cloudhub_Mulesoft_password"
+  url: https://anypoint.mulesoft.com
+  serviceType: CloudHub
+  MasterOrgId: 4c9b40bd-de80-449a-85a6-145f0f4c59d3
+  MasterOrgDomain: digitalai-2
+  children:
+  - name: Digital.ai
+    type: mule.Mulesoft.Domain
+    allowConcurrentDeployments: true
+    OrgId: 4c9b40bd-de80-449a-85a6-145f0f4c59d3
+    OrgDomain: Digital.ai
+    children:
+    - name: Sandbox
+      type: mule.Mulesoft.Domain.TargetEnvironment
+      allowConcurrentDeployments: true
+      envName: Sandbox
+      envId: 5b7e1529-04c4-4a39-85cc-7aff7ddedabf
+    - name: Design
+      type: mule.Mulesoft.Domain.TargetEnvironment
+      allowConcurrentDeployments: true
+      envName: Design
+      envId: 6581ea4a-9f57-47a3-b354-6431789883f2
+- name: Infrastructure/RuntimeFabric-Mulesoft
+  type: mule.Mulesoft
+  allowConcurrentDeployments: true
+  username: 37b6c3a1afd144ef8526abe03bc31222
+  password: !value "Infrastructure_RuntimeFabric_Mulesoft_password"
+  url: https://anypoint.mulesoft.com
+  serviceType: Runtime Fabric
+  MasterOrgId: ""
+  MasterOrgDomain: ""

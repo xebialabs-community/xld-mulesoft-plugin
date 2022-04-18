@@ -7,7 +7,8 @@
 import mule.mulesoftClient
 reload(mule.mulesoftClient)
 from mule.mulesoftClient import mulesoftClient
-print "Modifying application."
+
+print("Modifying application.")
 client = mulesoftClient.create_client_from_deployed(deployed)
 domain = str(deployed.domain)
 workers = str(deployed.workers)
@@ -21,4 +22,4 @@ client.modify_package(deployed.file.path, domain, workers, Enabled, muleVersion,
 # print "deploy"
 # client.deploy_package(deployed.file.path)
 
-print "Done"
+print("Done")

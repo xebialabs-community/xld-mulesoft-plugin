@@ -9,7 +9,7 @@ reload(mule.mulesoftClient)
 from mule.mulesoftClient import mulesoftClient
 
 client = mulesoftClient.create_client_from_deployed(deployed)
-print "Deploying application..."
+print("Deploying application...")
 domain = str(deployed.domain)
 workers = str(deployed.workers)
 Enabled = deployed.monitoringAutoRestart
@@ -20,4 +20,4 @@ appProperties = deployed.appProperties
 client.deploy_package(deployed.file.path, domain, workers, Enabled, muleVersion, numWorkers, region, appProperties)
 # can also use: deployed.deployable.file.path
 
-print "Finished deploying application."
+print("Finished deploying application.") 

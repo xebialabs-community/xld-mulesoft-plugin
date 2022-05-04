@@ -3,27 +3,29 @@
 # The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import requests
-import time
 
 import mule.mulesoftClient
 reload(mule.mulesoftClient)
 from mule.mulesoftClient import mulesoftClient
+import time
 
-client = mulesoftClient.create_client_from_deployed(previousDeployed)
-print("undeploying application")
-domain = str(previousDeployed.domain)
-client.undeploy_package(domain)
-print("Checking undeploy status")
-stillDeployed = True
+print("Modifying RTF application.")
+client = mulesoftClient.create_client_from_deployed(deployed)
+print("servertype = %s" % client.serviceType)
+# This function will also modify an application
+client.deploy_or_modify_packageRTF(deployed)
+print("Checking deploy status")
+isDeployed = False
 i = 0
-while(stillDeployed):
-    time.sleep(previousDeployed.wait_time)
-    stillDeployed = client.check_is_deployed(domain)
-    if i == int(previousDeployed.attempts):
+while(not isDeployed):
+    time.sleep(deployed.wait_time)
+    isDeployed = client.check_is_deployedRTF(deployed.domain)
+    if i == int(deployed.attempts):
         # Timeout Error
-        stillDeployed = False
-        print("TIME OUT CHECKING STATUS - UNDEPLOY IS NOT CONFIRMED")
+        isDeployed = True
+        print("TIME OUT CHECKING STATUS - DEPLOY IS NOT CONFIRMED")
     i += 1
+print("Finished modifying application.")
 
-print("Done.")
+
+print("Done")

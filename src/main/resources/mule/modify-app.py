@@ -7,6 +7,7 @@
 import mule.mulesoftClient
 reload(mule.mulesoftClient)
 from mule.mulesoftClient import mulesoftClient
+import time
 
 print("Modifying application.")
 client = mulesoftClient.create_client_from_deployed(deployed)
@@ -19,7 +20,17 @@ region = deployed.region
 appProperties = deployed.appProperties
 # print previousDeployed.file
 client.modify_package(deployed.file.path, domain, workers, Enabled, muleVersion, numWorkers, region, appProperties)
-# print "deploy"
-# client.deploy_package(deployed.file.path)
+print("Checking deploy status")
+isDeployed = False
+i = 0
+while(not isDeployed):
+    time.sleep(deployed.wait_time)
+    isDeployed = client.check_is_deployed(domain)
+    if i == int(deployed.attempts):
+        # Timeout Error
+        isDeployed = True
+        print("TIME OUT CHECKING STATUS - DEPLOY IS NOT CONFIRMED")
+    i += 1
+print("Finished modifying application.") 
 
 print("Done")

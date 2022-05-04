@@ -18,12 +18,44 @@ spec:
         fileEncodings:
           ".+\\.properties": ISO-8859-1
         isRescanned: false
-        domain: digitalai-2
+        domain: test-deploy-ld
         numWorkers: "1"
-        workers: "{\"name\":\"Micro\",\"weight\":\"0.1\",\"cpu\":\"0.1 vCores\", \"\
-          memory\":\"500 MB memory\"}"
+        workers: "{\"name\":\"Micro\",\"weight\":\"0.1\",\"cpu\":\"0.1 vCores\", \"memory\"\
+      :\"500 MB memory\"}"
         region: us-east-2
         MulesoftVersion: 4.4.0
+        wait_time: 30
+        attempts: 10
         file: !file "artifacts/Applications/Cloudhub-Mulesoft-App-Dir/Cloudhub-Mulesoft-App/V2.0/Cloudhub-Mulesoft-App/hellomule.jar"
+      dependencyResolution: LATEST
+      undeployDependencies: "false"
+- directory: Applications/RuntimeFabric-App-Dir
+  children:
+  - name: Runtime-App
+    type: udm.Application
+    lastVersion: V1.0
+    children:
+    - name: V1.0
+      type: udm.DeploymentPackage
+      deployables:
+      - name: cicdsample-app
+        type: mule.RTFApplication
+        domain: cicdsample
+        packaging: jar
+        applicationVersion: 1.0.0
+        clusteringEnabled: "false"
+        clustered: "false"
+        lastMileSecurity: "false"
+        cpuReserved: 500m
+        cpuMax: 1000m
+        memoryReserved: 700Mi
+        publicUrl: api-dev.fhmc.cloud/cicdsample
+        replicationFactor: "1"
+        replicas: "1"
+        provider: MC
+        targetId: "c0d8ddfa-b4aa-4418-a8ef-66ca2c62a448"
+        MulesoftVersion: 4.4.0
+        wait_time: 30
+        attempts: 10
       dependencyResolution: LATEST
       undeployDependencies: "false"

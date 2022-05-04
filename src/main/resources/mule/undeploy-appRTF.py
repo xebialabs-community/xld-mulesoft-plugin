@@ -11,19 +11,19 @@ reload(mule.mulesoftClient)
 from mule.mulesoftClient import mulesoftClient
 
 client = mulesoftClient.create_client_from_deployed(previousDeployed)
-print("undeploying application")
+print ("undeploying application")
 domain = str(previousDeployed.domain)
-client.undeploy_package(domain)
+client.undeploy_packageRTF(domain)
 print("Checking undeploy status")
 stillDeployed = True
 i = 0
 while(stillDeployed):
     time.sleep(previousDeployed.wait_time)
-    stillDeployed = client.check_is_deployed(domain)
+    stillDeployed = client.check_is_deployedRTF(domain)
     if i == int(previousDeployed.attempts):
         # Timeout Error
         stillDeployed = False
         print("TIME OUT CHECKING STATUS - UNDEPLOY IS NOT CONFIRMED")
     i += 1
 
-print("Done.")
+print ("Done.")

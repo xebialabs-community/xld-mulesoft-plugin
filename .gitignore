@@ -1,2 +1,12 @@
-.gradle/*
-build/*
+.gradle
+build
+temp
+work
+supervisord.*
+.vscode
+.idea
+.classpath
+.project
+.settings/
+bin/
+src/test/resources/xebialabs/secrets.xlvals

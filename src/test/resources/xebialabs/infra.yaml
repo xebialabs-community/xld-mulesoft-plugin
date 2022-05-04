@@ -5,35 +5,90 @@ spec:
 - name: Infrastructure/Cloudhub-Mulesoft
   type: mule.Mulesoft
   allowConcurrentDeployments: true
-  username: ldamato
+  username: llynch44
   password: !value "Infrastructure_Cloudhub_Mulesoft_password"
-  url: https://anypoint.mulesoft.com
+  MasterOrgId: 01b9b8a5-cbe7-4371-80ca-6ccbe230a468
+  MasterOrgDomain: magichome
   serviceType: CloudHub
-  MasterOrgId: 4c9b40bd-de80-449a-85a6-145f0f4c59d3
-  MasterOrgDomain: digitalai-2
   children:
-  - name: Digital.ai
+  - name: Magichome
     type: mule.Mulesoft.Domain
     allowConcurrentDeployments: true
-    OrgId: 4c9b40bd-de80-449a-85a6-145f0f4c59d3
-    OrgDomain: Digital.ai
+    OrgDomain: Magichome
+    OrgId: 01b9b8a5-cbe7-4371-80ca-6ccbe230a468
     children:
     - name: Sandbox
       type: mule.Mulesoft.Domain.TargetEnvironment
       allowConcurrentDeployments: true
       envName: Sandbox
-      envId: 5b7e1529-04c4-4a39-85cc-7aff7ddedabf
+      envId: 4f78a59e-6d80-42f8-8a4e-72d86c2098b8
     - name: Design
       type: mule.Mulesoft.Domain.TargetEnvironment
       allowConcurrentDeployments: true
       envName: Design
-      envId: 6581ea4a-9f57-47a3-b354-6431789883f2
+      envId: c0fd035d-d76d-4a8b-8bb3-f6262bc0608b
 - name: Infrastructure/RuntimeFabric-Mulesoft
   type: mule.Mulesoft
   allowConcurrentDeployments: true
-  username: 37b6c3a1afd144ef8526abe03bc31222
+  username: 57604998b2be4e2ab52027d15ef8b893
   password: !value "Infrastructure_RuntimeFabric_Mulesoft_password"
-  url: https://anypoint.mulesoft.com
+  MasterOrgId: 6ac95742-634a-4f96-a7ab-3f3fd976b845
+  MasterOrgDomain: freedommortgagemaster
   serviceType: Runtime Fabric
-  MasterOrgId: ""
-  MasterOrgDomain: ""
+  children:
+  - name: Enterprise
+    type: mule.Mulesoft.Domain
+    allowConcurrentDeployments: true
+    OrgDomain: Enterprise
+    OrgId: c6d390b6-43cc-4c8a-88d0-b77d5903ae8b
+    children:
+    - name: dev
+      type: mule.Mulesoft.Domain.RTFTargetEnvironment
+      allowConcurrentDeployments: true
+      envName: dev
+      envId: 396e7cde-6809-4730-9f26-0f1ebbae273b
+    - name: dev-public
+      type: mule.Mulesoft.Domain.RTFTargetEnvironment
+      allowConcurrentDeployments: true
+      envName: dev-public
+      envId: c3c7aa03-6f5c-43e0-9cf5-ec47b921db71
+    - name: dr-dev-public
+      type: mule.Mulesoft.Domain.RTFTargetEnvironment
+      allowConcurrentDeployments: true
+      envName: dr-dev-public
+      envId: 8dab2da7-7068-4314-b1a4-3ee84ce79da5
+    - name: prod
+      type: mule.Mulesoft.Domain.RTFTargetEnvironment
+      allowConcurrentDeployments: true
+      envName: prod
+      envId: ba1ee9a0-8186-4f05-9d61-64b9b656e4be
+    - name: test-public
+      type: mule.Mulesoft.Domain.RTFTargetEnvironment
+      allowConcurrentDeployments: true
+      envName: test-public
+      envId: b32aa5e4-789c-437c-9dda-befdcfcb4f2d
+    - name: design
+      type: mule.Mulesoft.Domain.RTFTargetEnvironment
+      allowConcurrentDeployments: true
+      envName: design
+      envId: 01ae3964-d2a4-4341-bbcd-421126d8f8d8
+    - name: uat
+      type: mule.Mulesoft.Domain.RTFTargetEnvironment
+      allowConcurrentDeployments: true
+      envName: uat
+      envId: cdf3b939-bc26-4509-9266-1f21020579e4
+    - name: test
+      type: mule.Mulesoft.Domain.RTFTargetEnvironment
+      allowConcurrentDeployments: true
+      envName: test
+      envId: b50d13ef-356f-4c43-a57f-724950b50fcb
+    - name: dr-dev
+      type: mule.Mulesoft.Domain.RTFTargetEnvironment
+      allowConcurrentDeployments: true
+      envName: dr-dev
+      envId: 40b0b90d-a4c6-42ac-997c-8c8d292551b8
+    - name: uat-public
+      type: mule.Mulesoft.Domain.RTFTargetEnvironment
+      allowConcurrentDeployments: true
+      envName: uat-public
+      envId: 4f05366f-5ca5-4189-905f-88d68b6d40af

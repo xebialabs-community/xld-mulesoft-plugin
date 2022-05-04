@@ -11,17 +11,14 @@ import requests
 import mule.mulesoftUtils as mulesoftUtils
 import os
 
-os.environ['REQUESTS_CA_BUNDLE'] = 'ca.pem';
+os.environ['REQUESTS_CA_BUNDLE'] = 'ca.pem'
 
 import org.slf4j.LoggerFactory as LoggerFactory
 
 logger = LoggerFactory.getLogger("Mulesoft")
 
 class mulesoftClient(object):
-    def __init__(self, url, username, password, orgId, envId, cert, serviceType):
-        self.url = url
-        if url.endswith('/'):
-            self.url = url[:-1]
+    def __init__(self, username, password, orgId, envId, serviceType):
         self.username = username
         self.password = password
         self.serviceType = serviceType
@@ -33,60 +30,42 @@ class mulesoftClient(object):
     @staticmethod
     def create_client_from_deployed(deployed):
         mmc = deployed.container
-        return mulesoftClient(mmc.orgLevelDomain.masterDomain.url, mmc.orgLevelDomain.masterDomain.username, mmc.orgLevelDomain.masterDomain.password, mmc.orgLevelDomain.OrgId, mmc.envId,  mmc.orgLevelDomain.masterDomain.caCert, mmc.orgLevelDomain.masterDomain.serviceType)
+        return mulesoftClient(mmc.orgLevelDomain.masterDomain.username, mmc.orgLevelDomain.masterDomain.password, mmc.orgLevelDomain.OrgId, mmc.envId, mmc.orgLevelDomain.masterDomain.serviceType)
 
-    def get_token(self):
-        if self.serviceType == "Runtime Fabric":
-            print("In RuntimeFabric Auth block")
-            # Hit the login endpoint to get a bearer token
-            token = mulesoftUtils.get_token_conn_app(self.username, self.password, self.url)
-            print('Got Runtime Fabric token')
-        else:
-            # Hit the login endpoint to get a bearer token
-            print("In Cloudhub Auth block")
-            token = mulesoftUtils.get_token_user(self.username, self.password, self.url)
-            print('Got Cloudhub token')
+###### DEPLOY ##########
     
-        return token
-
-
-    def deploy_package(self, file_path, domain, workers, Enabled, muleVersion, numWorkers, region, appProperties):
-
-        workers = json.loads(workers)
-        url = "https://anypoint.mulesoft.com/cloudhub/api/v2/applications"
-
+    def deploy_package(self, domain, workers, Enabled, muleVersion, numWorkers, region, appProperties, file_path):
+        httpMethod = "POST"
+        # Handle properties obj
         prop = {}
         for (k,v) in appProperties.items() :
             prop[k] = v
+        # Handle workers obj
+        try:
+            workers = json.loads(workers)
+        except:
+            raise Exception("Configuration error in Deploy for mule application RTF Deploy JSON. Value must be in JSON format.")
 
-        payload = {
-            'appInfoJson': {
-                "domain": domain,
-                "muleVersion" : {"version":muleVersion}, #infra
-                "region" : region, #infra"  ca-c1.cloudhub.io"#
-                "monitoringEnabled": True,
-                "monitoringAutoRestart" : Enabled,
-                "workers": {"amount": numWorkers, "type": workers},
-                "loggingNgEnabled": True,
-                "persistentQueues": False,
-                "properties": prop
-                },
-            'autoStart': "true",
-            }
-
-        # Convert inner appInfojson to string
-        payload['appInfoJson']= json.dumps(payload['appInfoJson'])
-
-        files = [
-          ('file', open(file_path,'rb'))
-        ]
+        if (workers.get('name') is None) or (workers.get('weight') is None) or (workers.get('cpu') is None) or (workers.get('memory') is None):
+            print("This app is to be deployed to Cloudhub. Cloudhub Works JSON must contain values for name, weight, cpu and memory.")
+            print("current object: %s" % json.dumps(workers))
+            # example {"name":"Micro","weight":"0.1","cpu":"0.1 vCores", "memory":"500 MB memory"}
+            raise Exception("Configuration error in Deploy for mule application Cloudhub Deploy JSON.") 
+        url = "https://anypoint.mulesoft.com/cloudhub/api/v2/applications"
+        # get payload
+        payload = mulesoftUtils.create_deploy_payload_cloudhub(domain, muleVersion, region, Enabled, numWorkers, workers, prop)
         headers = {
-          'x-anypnt-env-id': str(self.EnvId),
-          'x-anypnt-org-id': str(self.OrgId),
-          'Authorization': 'Bearer %s' % self.token
+        'x-anypnt-env-id': str(self.EnvId),
+        'x-anypnt-org-id': str(self.OrgId),
+        'Authorization': 'Bearer %s' % self.token
         }
-        response = requests.request("POST", url, headers=headers, data = payload, files = files)
-        # response = requests.request("POST", url, headers=headers, files=payload)
+        files = [
+        ('file', open(file_path,'rb'))
+        ]
+        # Deploy
+        print("About to deploy, payload = %s" % json.dumps(payload))
+        response = requests.request( httpMethod, url, headers=headers, data = payload, files = files)
+    
         if response.status_code != 200: #  or response.raise_for_status()
             print (response.status_code)
             print (response.text)
@@ -100,50 +79,28 @@ class mulesoftClient(object):
         print (response.text)
 
 
-    def deploy_package_rtf(self, file_path, domain, workers, Enabled, muleVersion, numWorkers, region, appProperties):
+    def deploy_or_modify_packageRTF(self, deployed):
+        httpMethod = "POST"
 
-        # TODO: Get new 
-
-        workers = json.loads(workers)
-        url = "https://anypoint.mulesoft.com/cloudhub/api/v2/applications"
-
-        prop = {}
-        for (k,v) in appProperties.items() :
-            prop[k] = v
-
-        '''
-        payload = {
-            'appInfoJson': {
-                "domain": domain,
-                "muleVersion" : {"version":muleVersion}, #infra
-                "region" : region, #infra"  ca-c1.cloudhub.io"#
-                "monitoringEnabled": True,
-                "monitoringAutoRestart" : Enabled,
-                "workers": {"amount": numWorkers, "type": workers},
-                "loggingNgEnabled": True,
-                "persistentQueues": False,
-                "properties": prop
-                },
-            'autoStart': "true",
-            }
-        '''
-        
-
-        # Convert inner appInfojson to string
-        payload['appInfoJson']= json.dumps(payload['appInfoJson'])
-
-        files = [
-          ('file', open(file_path,'rb'))
-        ]
+        deploymentIdObj = mulesoftUtils.get_deployment_id_obj(self.token, self.OrgId, self.EnvId, deployed.domain)
+        if deploymentIdObj["name"] != "":
+            # We found a deployment entry, we should use PATCH rather than POST
+            httpMethod = "PATCH"
+            url = "https://anypoint.mulesoft.com/hybrid/api/v2/organizations/%s/environments/%s/deployments/%s" % (self.OrgId, self.EnvId, deploymentIdObj["id"])
+        else:
+            url = "https://anypoint.mulesoft.com/hybrid/api/v2/organizations/%s/environments/%s/deployments" % (self.OrgId, self.EnvId)
+        print("deploymentIdObj for domain %s - %s" % (deployed.domain, str(deploymentIdObj)))
+        # get payload
+        payload = mulesoftUtils.create_deploy_payload_rtf(deployed, deploymentIdObj, self.OrgId)
         headers = {
-          'x-anypnt-env-id': str(self.EnvId),
-          'x-anypnt-org-id': str(self.OrgId),
-          'Authorization': 'Bearer %s' % self.token
+        'Authorization': 'Bearer %s' % self.token,
+        'Content-Type': 'application/json'
         }
-        response = requests.request("POST", url, headers=headers, data = payload, files = files)
-        # response = requests.request("POST", url, headers=headers, files=payload)
-        if response.status_code != 200: #  or response.raise_for_status()
-            print (response.status_code)
+        # Deploy
+        print("About to deploy, payload = %s" % json.dumps(payload))
+        print("method - %s, url - %s" % (httpMethod, url) )
+        response = requests.request( httpMethod, url, headers=headers, data=payload)
+        if response.raise_for_status():
             print (response.text)
             raise Exception("Failed to deploy. Server returned %s.\n%s" % (response.status_code, response.reason))
         else:
@@ -153,10 +110,11 @@ class mulesoftClient(object):
                 print("Could not decode JSON")
         print (response.status_code)
         print (response.text)
-        
 
+
+###### UNDEPLOY ##########
     def undeploy_package(self, domain):
-        url = self._url + "/cloudhub/api/v2/applications"
+        url = "https://anypoint.mulesoft.com/cloudhub/api/v2/applications"
         #url = "https://anypoint.mulesoft.com/cloudhub/api/v2/applications"
         headers = {
           'x-anypnt-env-id': str(self.EnvId),
@@ -178,9 +136,27 @@ class mulesoftClient(object):
         else:
             print ("Application successfully deleted")
 
+        
+    def undeploy_packageRTF(self, domain):
+        headers = {
+          'Authorization': 'Bearer %s' % self.token,
+          'Content-Type': 'application/json'
+        }
+        deploymentIdObj = mulesoftUtils.get_deployment_id_obj(self.token, self.OrgId, self.EnvId, domain)
+        if deploymentIdObj["id"] == "":
+            raise Exception("Unable to retrieve deployment id for %s" % domain)
+
+        url = "https://anypoint.mulesoft.com/hybrid/api/v2/organizations/%s/environments/%s/deployments/%s" % (self.OrgId, self.EnvId, deploymentIdObj["id"])
+        response = requests.request("DELETE", url, headers=headers)
+        if response.raise_for_status():
+                 raise Exception("Failed to undeploy. Server returned %s.\n%s" % (response.status_code, response.reason))
+        else:
+            print ("Application successfully deleted")
+
+###### MODIFY ##########    
     def modify_package(self, file_path, domain, workers, Enabled, muleVersion, numWorkers, region, appProperties):
         #url = self._url + "/cloudhub/api/v2/applications/%s/files" % domain
-        url = self._url + ("/cloudhub/api/v2/applications/%s" % domain)
+        url = ("https://anypoint.mulesoft.com/cloudhub/api/v2/applications/%s" % domain)
         # url = "https://anypoint.mulesoft.com/cloudhub/api/v2/applications/%s/files" % domain
         headers = {
           'x-anypnt-env-id': str(self.EnvId),
@@ -206,10 +182,8 @@ class mulesoftClient(object):
                 },
             'autoStart': "true",
             }
-
         # Convert inner appInfojson to string
         payload['appInfoJson']= json.dumps(payload['appInfoJson'])
-
 
         files = [
           ('file', open(file_path,'rb'))
@@ -220,20 +194,63 @@ class mulesoftClient(object):
         else:
             print ("Application successfully updated")
 
-    def check_app_status(self, domain):
-        url = self._url + "/cloudhub/api/v2/applications"
-        #url = "https://anypoint.mulesoft.com/cloudhub/api/v2/applications"
+###### CHECK STATUS #####
+    def check_is_deployed(self, domain):
+        # print("In check_is_deployed")
+        url = "https://anypoint.mulesoft.com/cloudhub/api/v2/applications"
         headers = {
           'x-anypnt-env-id': str(self.EnvId),
           'Authorization': 'Bearer %s' % self.token
         }
         response = requests.request("GET", url, headers=headers)
+        # print("response status code = %s" % str(response.status_code))
         if response.raise_for_status():
                  raise Exception("Failed to check app status. Server returned %s.\n%s" % (response.status_code, response.reason))
         else:
-            # print "Application successfully deleted"
             response = response.json()
             for r in response:
-                if r['domain'] in domain:
-                    return True
+                if r['domain'] == domain:
+                    if r['status'] == "STARTED":
+                        return True
+                    else:
+                        return False
             return False
+
+
+    def check_is_deployedRTF(self, domain):
+        url = "https://anypoint.mulesoft.com/hybrid/api/v2/organizations/%s/environments/%s/deployments" % (self.OrgId, self.EnvId)
+        headers = {
+          'Authorization': 'Bearer %s' % self.token
+        }
+        response = requests.request("GET", url, headers=headers)
+        # print("response status code = %s" % str(response.status_code))
+        if response.raise_for_status():
+                 raise Exception("Failed to check app status. Server returned %s.\n%s" % (response.status_code, response.reason))
+        else:
+            response = response.json()
+            if response["items"]:
+                for i in response['items']:
+                    if i["name"] == domain:
+                        if i["application"]["status"] == "RUNNING":
+                            return True
+                        else:
+                            return False
+            return False
+
+###### UTILS ##########
+    def get_token(self):
+        if self.serviceType == "Runtime Fabric" or self.serviceType == "CloudHub - Use OAuth 2.0":
+            print("In  OAuth block")
+            # Hit the login endpoint to get a bearer token
+            token = mulesoftUtils.get_token_conn_app(self.username, self.password)
+            print('Got OAuth token')
+        else:
+            # Hit the login endpoint to get a bearer token
+            print("In Cloudhub Auth block")
+            token = mulesoftUtils.get_token_user(self.username, self.password)
+            print('Got Cloudhub token')   
+        return token
+
+
+    
+    

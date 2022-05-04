@@ -23,6 +23,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         </steps>
     </rule>
 
+    <rule name="MuleRTF.CREATE" scope="deployed">
+        <conditions>
+            <type>mule.RTFApplicationModule</type>
+            <operation>CREATE</operation>
+        </conditions>
+        <steps>
+            <jython>
+                <description expression="true">"Deploy application %s on %s" % (deployed.domain, deployed.container.name)</description>
+                <script>mule/install-appRTF.py</script>
+                <order>61</order>
+            </jython>
+        </steps>
+    </rule>
+
     <rule name="Mule.MODIFY" scope="deployed">
         <conditions>
             <type>mule.ApplicationModule</type>
@@ -37,6 +51,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         </steps>
     </rule>
 
+    <rule name="MuleRTF.MODIFY" scope="deployed">
+        <conditions>
+            <type>mule.RTFApplicationModule</type>
+            <operation>MODIFY</operation>
+        </conditions>
+        <steps>
+            <jython>
+                <description expression="true">"modify application %s on %s" % (deployed.domain, deployed.container.name)</description>
+                <script>mule/modify-appRTF.py</script>
+                <order>51</order>
+            </jython>
+        </steps>
+    </rule>
+
     <rule name="Mule.UninstallApplicationToServerGroup" scope="deployed">
         <conditions>
             <type>mule.ApplicationModule</type>
@@ -47,6 +75,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 <order>40</order>
                 <description expression="true">"Undeploy application %s from %s" % (previousDeployed.domain, previousDeployed.container.name)</description>
                 <script>mule/undeploy-app.py</script>
+            </jython>
+        </steps>
+    </rule>
+
+    <rule name="MuleRTF.UninstallApplicationToServerGroup" scope="deployed">
+        <conditions>
+            <type>mule.RTFApplicationModule</type>
+            <operation>DESTROY</operation>
+        </conditions>
+        <steps>
+            <jython>
+                <order>41</order>
+                <description expression="true">"Undeploy application %s from %s" % (previousDeployed.domain, previousDeployed.container.name)</description>
+                <script>mule/undeploy-appRTF.py</script>
             </jython>
         </steps>
     </rule>

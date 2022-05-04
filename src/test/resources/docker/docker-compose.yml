@@ -9,7 +9,7 @@
 #
 
 xld:
-  image: xebialabs/xl-deploy:10.3
+  image: xebialabs/xl-deploy:10.2
   volumes: 
     # - ~/xl-licenses/deployit-license.lic:/opt/xebialabs/xl-deploy-server/conf/deployit-license.lic
     - ./../../../../build/distributions/:/opt/xebialabs/xl-deploy-server/plugins/__local__/

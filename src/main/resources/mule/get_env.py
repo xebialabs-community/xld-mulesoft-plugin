@@ -14,13 +14,13 @@ import os
 
 
 # Get Bearer Token
-if thisCi.masterDomain.serviceType == "Runtime Fabric":
+if thisCi.masterDomain.serviceType == "Runtime Fabric" or thisCi.masterDomain.serviceType == "CloudHub - Use OAuth 2.0":
     # Hit the login endpoint to get a bearer token
-    token = mulesoftUtils.get_token_conn_app(thisCi.masterDomain.username, thisCi.masterDomain.password, thisCi.masterDomain.url)
-    print('Got Runtime Fabric token')
+    token = mulesoftUtils.get_token_conn_app(thisCi.masterDomain.username, thisCi.masterDomain.password)
+    print('Got OAuth token')
 else:
     print("In Cloudhub Auth block")
-    token = mulesoftUtils.get_token_user(thisCi.username, thisCi.password, thisCi.url)
+    token = mulesoftUtils.get_token_user(thisCi.masterDomain.username, thisCi.masterDomain.password)
     print ('Got Cloudhub token')
 
 

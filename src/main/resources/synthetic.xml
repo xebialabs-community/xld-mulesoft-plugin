@@ -9,11 +9,10 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <synthetic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xmlns="http://www.xebialabs.com/deployit/synthetic"
-           xsi:schemaLocation="http://www.xebialabs.com/deployit/synthetic synthetic.xsd">
+  xmlns="http://www.xebialabs.com/deployit/synthetic" xsi:schemaLocation="http://www.xebialabs.com/deployit/synthetic synthetic.xsd">
 
 
-    <!-- <type type="mule.Mulesoft" extends="udm.BaseContainer" description="The controlling unit in a Kubernetes cluster which serves as the main management contact point for administrators." root="INFRASTRUCTURE">
+  <!-- <type type="mule.Mulesoft" extends="udm.BaseContainer" description="The controlling unit in a Kubernetes cluster which serves as the main management contact point for administrators." root="INFRASTRUCTURE">
       <property name="username" label="Username" required="false" kind="string" category="Username/password Authentication" description="Username with which to authenticate, if using username/password authentication." />
       <property name="password" label="Password" required="false" kind="string" password="true" category="Username/password Authentication" description="Password with which to authenticate, if using username/password authentication." />
       <property name="url" label="URL" required="false" kind="string" description="Authentication token, if using token based authentication." />
@@ -23,30 +22,27 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   <type type="mule.Mulesoft" extends="udm.BaseContainer" description="Cloudhub Service Credentials" root="INFRASTRUCTURE" inspectable="true">
     <property name="username" label="Username or Client ID" kind="string" default="" inspectionProperty="true" description="Cloudhub Username or Runtime Fabric Client ID" />
     <property name="password" label="Password or Client Secret" kind="string" password="true" default="" inspectionProperty="true" description="Cloudhub Password or Runtime Fabric Client Secret" />
-    <property name="url" label="URL" kind="string" default="https://anypoint.mulesoft.com"/>
     <property name="serviceType" kind="enum" label="Service Type" default="CloudHub">
-          <enum-values>
-            <value>CloudHub</value>
-            <value>Runtime Fabric</value>
-          </enum-values>
-        </property>
-    <property name="caCert" label="CA certificate" required="false" kind="string" size="large" description="Certification authority certificate(ca.crt) for server" />
+      <enum-values>
+        <value>CloudHub</value>
+        <!--<value>CloudHub - Use OAuth 2.0</value>-->
+        <value>Runtime Fabric</value>
+      </enum-values>
+    </property>
     <!--property name="password" label="Password" required="false" kind="string" password="true" category="Username/password Authentication" description="Password with which to authenticate, if using username/password authentication." /-->
 
     <property name="MasterOrgId" default="" required="false" category="Metadata" description="Organization ID (auto-filled during discovery)" />
     <property name="MasterOrgDomain" default="" required="false" category="Metadata" description="Organization domain (auto-filled during discovery)" />
-    <method name="findEnvironments" label="Find Domains, Environments" delegate="jythonScript" description="Download the list of available domains and environment from Cloudhub."
-                script="mule/get_profile.py"/>
+    <method name="findEnvironments" label="Find Domains, Environments" delegate="jythonScript" description="Download the list of available domains and environment from Cloudhub." script="mule/get_profile.py"/>
 
   </type>
 
-  <type type="mule.Mulesoft.Domain" extends="udm.BaseContainer" description="Points to a Cloudhub Domain">
+  <type type="mule.Mulesoft.Domain" extends="udm.BaseContainer" description="Points to a Cloudhub or RFT Domain">
     <property name="masterDomain" kind="ci" referenced-type="mule.Mulesoft" as-containment="true"/>
     <property name="OrgDomain" kind="string" label="Organization Domain" required="true" description="Organization Domain. This can be filled during discovery."/>
-    <property name="OrgId" kind="string" required="false" description="Organization Id as indentified in CloudHub. This looks like '1e74a63d-f32b-4b52-a8cf-eeea24f99bb1' and can be filled during discovery."/>
+    <property name="OrgId" kind="string" required="false" description="Organization Id as indentified in CloudHub or RTF. This looks like '1e74a63d-f32b-4b52-a8cf-eeea24f99bb1' and can be filled during discovery."/>
     <!-- <property name="defaultAppSpec" kind="string" size="large" required="true" description=""/> -->
-    <method name="findEnvironments" label="Find Environments" delegate="jythonScript" description="Download the list of available environments from Cloudhub."
-                script="mule/get_env.py"/>
+    <method name="findEnvironments" label="Find Environments" delegate="jythonScript" description="Download the list of available environments from Cloudhub." script="mule/get_env.py"/>
 
   </type>
 
@@ -57,8 +53,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     <!-- <property name="defaultAppSpec" kind="string" size="large" required="true" description=""/> -->
   </type>
 
+  <type type="mule.Mulesoft.Domain.RTFTargetEnvironment" extends="udm.BaseContainer" description="Points to a Runtime Fabric environment, such as sandbox or production. It is possible create multiple TargetEnvironments pointing to the same Runtime environment.">
+    <property name="orgLevelDomain" kind="ci" referenced-type="mule.Mulesoft.Domain" as-containment="true"/>
+    <property name="envName" kind="string" required="false" description="Environment name as listed in Runtime Fabric. This helps you identify which Runtime Environment is being targeted, but this is not required for deployment."/>
+    <property name="envId" kind="string" label="EnvironmentID" required="true" description="Environment unique ID. This looks like '1e74a63d-f32b-4b52-a8cf-eeea24f99bb1' and can be filled during discovery."/>
+    <!-- <property name="defaultAppSpec" kind="string" size="large" required="true" description=""/> -->
+  </type>
 
-<!--
+
+  <!--
     <type type="mule.Mulesoft" extends="generic.Container" description="Cassandra CQL*Plus client">
       <property name="username" required="false" description="If set, the user name to use if none is set on the deployed cql.ExecutedcqlScripts" />
       <property name="password" required="false" password="true" description="If set, the password to use if none is set on the deployed cql.ExecutedcqlScripts" />
@@ -66,7 +69,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       <property name="sid" description="The Cassandra SID to connect to" />
     </type> -->
 
-    <!-- <type type="mule.AppTarget" extends="udm.BaseContainer" virtual="true">
+  <!-- <type type="mule.AppTarget" extends="udm.BaseContainer" virtual="true">
         <property name="sid" description="The Cassandra SID to connect to" />
     </type>
 
@@ -74,44 +77,85 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     <type type="mule.ServerGroup" extends="mule.AppTarget"/>
  -->
 
-    <type type="mule.ApplicationModule" extends="udm.BaseDeployedArtifact" deployable-type="mule.Application" container-type="mule.Mulesoft.Domain.TargetEnvironment">
-        <generate-deployable type="mule.Application" extends="udm.BaseDeployableArtifact"/>
-        <property name="domain"/>
-        <property name="monitoringAutoRestart" kind="boolean" default="true"/>
-        <property name="wait_time" kind="integer" hidden="true" default="10"/>
-        <property name="attempts" kind="integer" hidden="true" default="4"/>
-        <property name="numWorkers" kind="integer" label="Number of Workers" default="1"/>
-        <property name="workers" kind="enum" label="Worker cores">
-          <enum-values>
-            <value>{"name":"Micro","weight":"0.1","cpu":"0.1 vCores", "memory":"500 MB memory"}</value>
-            <value>{"name":"Small","weight":"0.2","cpu":"0.2 vCores", "memory":"1 GB memory"}</value>
-            <value>{"name":"Medium","weight":"1","cpu":"1 vCores", "memory":"1.5 GB memory"}</value>
-            <value>{"name":"large","weight":"2","cpu":"2 vCores", "memory":"3.5 GB memory"}</value>
-            <value>{"name":"xlarge","weight":"4","cpu":"4 vCores", "memory":"7.5 GB memory"}</value>
-            <value>{"name":"xxlarge","weight":"8","cpu":"8 vCores", "memory":"15 GB memory"}</value>
-            <value>{"name":"4xlarge","weight":"16","cpu":"16 vCores", "memory":"32 GB memory"}</value>
-          </enum-values>
-        </property>
-        <property name="appProperties" kind="map_string_string" required="false" description="App Properties"/>
-        <property name="region" kind="enum" label="Region" default="us-east-2">
-          <enum-values>
-            <value>us-east-1</value>
-            <value>us-east-2</value>
-            <value>us-west-1</value>
-            <value>us-west-2</value>
-            <value>us-gov-west-1</value>
-            <value>eu-central-1</value>
-            <value>eu-west-1</value>
-            <value>eu-west-2</value>
-            <value>ap-southeast-1</value>
-            <value>ap-southeast-2</value>
-            <value>ap-northeast-1</value>
-            <value>ca-central-1</value>
-            <value>sa-east-1</value>
-          </enum-values>
-        </property>
-        <property name="MulesoftVersion" label="Mulesoft Versions">
-        </property>
-    </type>
+  <type type="mule.ApplicationModule" extends="udm.BaseDeployedArtifact" deployable-type="mule.Application" container-type="mule.Mulesoft.Domain.TargetEnvironment">
+    <generate-deployable type="mule.Application" extends="udm.BaseDeployableArtifact"/>
+    <property name="domain"/>
+    <property name="monitoringAutoRestart" kind="boolean" default="true"/>
+    <property name="numWorkers" kind="integer" label="Number of Workers" default="1"/>
+    <property name="workers" kind="enum" label="Worker cores">
+      <enum-values>
+        <value>{"name":"Micro","weight":"0.1","cpu":"0.1 vCores", "memory":"500 MB memory"}</value>
+        <value>{"name":"Small","weight":"0.2","cpu":"0.2 vCores", "memory":"1 GB memory"}</value>
+        <value>{"name":"Medium","weight":"1","cpu":"1 vCores", "memory":"1.5 GB memory"}</value>
+        <value>{"name":"large","weight":"2","cpu":"2 vCores", "memory":"3.5 GB memory"}</value>
+        <value>{"name":"xlarge","weight":"4","cpu":"4 vCores", "memory":"7.5 GB memory"}</value>
+        <value>{"name":"xxlarge","weight":"8","cpu":"8 vCores", "memory":"15 GB memory"}</value>
+        <value>{"name":"4xlarge","weight":"16","cpu":"16 vCores", "memory":"32 GB memory"}</value>
+      </enum-values>
+    </property>
+    <property name="appProperties" kind="map_string_string" required="false" description="App Properties"/>
+    <property name="region" kind="enum" label="Region" default="us-east-2">
+      <enum-values>
+        <value>us-east-1</value>
+        <value>us-east-2</value>
+        <value>us-west-1</value>
+        <value>us-west-2</value>
+        <value>us-gov-west-1</value>
+        <value>eu-central-1</value>
+        <value>eu-west-1</value>
+        <value>eu-west-2</value>
+        <value>ap-southeast-1</value>
+        <value>ap-southeast-2</value>
+        <value>ap-northeast-1</value>
+        <value>ca-central-1</value>
+        <value>sa-east-1</value>
+      </enum-values>
+    </property>
+    <property name="wait_time" kind="integer" default="30" label="Results - Polling Wait Time"/>
+    <property name="attempts" kind="integer" default="10" label="Results - Polling Attempts Limit"/>
+    <property name="MulesoftVersion" label="Mulesoft Versions"/>
+  </type>
+
+  <type type="mule.RTFApplicationModule" extends="udm.BaseDeployed" deployable-type="mule.RTFApplication" container-type="mule.Mulesoft.Domain.RTFTargetEnvironment">
+    <generate-deployable type="mule.RTFApplication" extends="udm.BaseDeployable"/>
+    <property name="domain"/>
+
+    <property name="packaging" label="Packaging" default="jar">
+      <enum-values>
+        <value>jar</value>
+      </enum-values>
+    </property>
+    <property name="applicationVersion" label="Application Version"/>
+
+    <property name="clusteringEnabled" label="Clustering Enabled" kind="enum" default="false">
+      <enum-values>
+        <value>false</value>
+        <value>true</value>
+      </enum-values>
+    </property>
+    <property name="clustered" label="Clustered" kind="enum" default="false">
+      <enum-values>
+        <value>false</value>
+        <value>true</value>
+      </enum-values>
+    </property>
+    <property name="lastMileSecurity" label="Last Mile Security" kind="enum" default="false">
+      <enum-values>
+        <value>false</value>
+        <value>true</value>
+      </enum-values>
+    </property>
+    <property name="cpuReserved" label="CPU Reserved"/>
+    <property name="cpuMax" label="CPU Max"/>
+    <property name="memoryReserved" label="Memory Reserved"/>
+    <property name="publicUrl" label="Public URL"/>
+    <property name="replicationFactor" kind="integer" default="1" label="Replication Factor"/>
+    <property name="replicas" kind="integer" label="Replicas" default="1"/>
+    <property name="provider" label="Provider" default="MC" />
+    <property name="MulesoftVersion" label="Mulesoft Version"/>
+    <property name="targetId" label="Target Id"/>
+    <property name="wait_time" kind="integer" label="Results - Polling Wait Time" default="10" />
+    <property name="attempts" kind="integer" label="Results - Polling Attempts Limit" default="4" />
+  </type>
 
 </synthetic>

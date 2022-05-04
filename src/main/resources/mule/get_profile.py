@@ -12,19 +12,19 @@ from com.xebialabs.deployit.plugin.api.reflect import Type
 import mule.mulesoftUtils as mulesoftUtils 
 
 # Get Token
-if thisCi.serviceType == "Runtime Fabric":
-    print("In RuntimeFabric Auth block")
-    token = mulesoftUtils.get_token_conn_app(thisCi.username, thisCi.password, thisCi.url)
-    print('Got Runtime Fabric token')
+if thisCi.serviceType == "Runtime Fabric" or thisCi.serviceType == "CloudHub - Use OAuth 2.0":
+    print("In OAuth block")
+    token = mulesoftUtils.get_token_conn_app(thisCi.username, thisCi.password)
+    print('Got OAuth token')
 else:
     print("In Cloudhub Auth block")
-    token = mulesoftUtils.get_token_user(thisCi.username, thisCi.password, thisCi.url)
+    token = mulesoftUtils.get_token_user(thisCi.username, thisCi.password)
     print ('Got Cloudhub token')
 
 # Download the user/org profile and find out what environments we have
 
 authHeader = {"Authorization":"Bearer " + token}
-profile_uri = thisCi.url + '/accounts/api/profile'
+profile_uri = 'https://anypoint.mulesoft.com/accounts/api/profile'
 profileResponse = requests.get(profile_uri, headers=authHeader)
 profileResponseJson = profileResponse.json()
 
@@ -56,6 +56,11 @@ for domainItem in profileResponseJson['contributorOfOrganizations']:
         newTeCi.OrgDomain = domainItem['name']
         newTeCi.OrgId = domainItem['id']
         repositoryService.create(newCiId, newTeCi)
-        mulesoftUtils.create_env(str(domainItem['id']), str(newCiId), token, repositoryService, metadataService)
+        try:
+            mulesoftUtils.create_env(str(domainItem['id']), str(newCiId), token, repositoryService, metadataService)
+        except:
+            print("Unable to retrieve envionments for this domain - %s, will delete this domain and continue" % str(newCiId))
+            repositoryService.delete(newCiId)
+        
 
 print ('Done.')

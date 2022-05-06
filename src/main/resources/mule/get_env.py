@@ -6,7 +6,6 @@
 
 import json
 import requests
-import requests.utils
 from com.xebialabs.deployit.plugin.api.reflect import Type
 # Fixes some issues with TLS
 import mule.mulesoftUtils as mulesoftUtils
@@ -24,6 +23,6 @@ else:
     print ('Got Cloudhub token')
 
 
-mulesoftUtils.create_env(thisCi.OrgId, thisCi.id, token, repositoryService, metadataService)
+mulesoftUtils.create_env(thisCi.OrgId, thisCi.id, token, repositoryService, metadataService, thisCi.masterDomain.serviceType)
 
 print('Done')

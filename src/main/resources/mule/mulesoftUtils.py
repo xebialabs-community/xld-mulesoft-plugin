@@ -6,7 +6,6 @@
 
 import json
 import requests
-import requests.utils
 from com.xebialabs.deployit.plugin.api.reflect import Type
 # Fixes some issues with TLS
 import os
@@ -47,7 +46,7 @@ def get_token_conn_app(username, password):
         responseJson = response.json()
         return responseJson['access_token']
 
-def create_env(id, name, token, repositoryService, metadataService):
+def create_env(id, name, token, repositoryService, metadataService, serviceType):
     print("Debug - id = %s, name = %s, " % (id, name))
     envUrl = "https://anypoint.mulesoft.com/accounts/api/organizations/%s/environments" % id
     authHeader = {"Authorization":"Bearer " + token}
@@ -65,7 +64,10 @@ def create_env(id, name, token, repositoryService, metadataService):
         if repositoryService.exists(newCiId) :
             print('   ' + envItem['name'] + ' already exists, skipping.')
         else :
-            newTeCi =metadataService.findDescriptor(Type.valueOf('mule.Mulesoft.Domain.TargetEnvironment')).newInstance(newCiId)
+            if serviceType == "Runtime Fabric":
+                newTeCi =metadataService.findDescriptor(Type.valueOf('mule.Mulesoft.Domain.RTFTargetEnvironment')).newInstance(newCiId)
+            else:
+                newTeCi =metadataService.findDescriptor(Type.valueOf('mule.Mulesoft.Domain.TargetEnvironment')).newInstance(newCiId)
             newTeCi.envName = envItem['name']
             newTeCi.envId = envItem['id']
             repositoryService.create(newCiId, newTeCi)

@@ -98,8 +98,8 @@ def create_deploy_payload_rtf(deployed, deploymentIdObj, orgId):
     # gather variable values
     appName = deployed.name
     print("deployed.name = %s" % appName)
-    muleEnv = deployed.container.envName
-    print("muleEnv = %s" % muleEnv)
+    #muleEnv = deployed.container.envName
+    #print("muleEnv = %s" % muleEnv)
     domain = deployed.domain
     packaging = deployed.packaging
     applicationVersion = deployed.applicationVersion
@@ -116,6 +116,11 @@ def create_deploy_payload_rtf(deployed, deploymentIdObj, orgId):
     provider = deployed.provider
     targetId = deployed.targetId
 
+    # Handle properties obj
+    prop = {}
+    for (k,v) in deployed.appProperties.items() :
+        prop[k] = v
+
     # If this is a modify operation, replace values with those discovered in 'get deployment ids'
     if deploymentIdObj["name"] != "":
         provider = deploymentIdObj["provider"]
@@ -128,9 +133,7 @@ def create_deploy_payload_rtf(deployed, deploymentIdObj, orgId):
                 "configuration": {
                     "mule.agent.application.properties.service": {
                         "applicationName": appName,
-                        "properties": {
-                            "mule.env": muleEnv 
-                        }
+                        "properties": prop,
                     }
                 },
                 "desiredState": "STARTED", 

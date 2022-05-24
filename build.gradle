@@ -9,7 +9,7 @@ defaultTasks 'build'
 
 apply plugin: 'java'
 
-version = "2.0.2"
+version = "2.0.4"
 
 xlDocker {
   compileImage = 'xebialabsunsupported/xld_dev_compile'

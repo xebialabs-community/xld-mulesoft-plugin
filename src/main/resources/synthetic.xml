@@ -152,6 +152,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     <property name="replicationFactor" kind="integer" default="1" label="Replication Factor"/>
     <property name="replicas" kind="integer" label="Replicas" default="1"/>
     <property name="provider" label="Provider" default="MC" />
+    <property name="appProperties" kind="map_string_string" required="false" description="App Properties"/>
     <property name="MulesoftVersion" label="Mulesoft Version"/>
     <property name="targetId" label="Target Id"/>
     <property name="wait_time" kind="integer" label="Results - Polling Wait Time" default="10" />
